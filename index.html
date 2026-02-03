@@ -211,7 +211,7 @@
         html += `<div class="direct-grid" style="margin-top:10px;">`;
         PROBLEM_SITES.forEach(site => {
             const internalUrl = `${site.url}${encodeURIComponent(query)}`;
-            html += `<a href="${internalUrl}" target="_blank" class="direct-btn">Check ${site.name} ↗</a>`;
+            html += `<a href="${internalUrl}" target="_blank" class="direct-btn">${site.name} ↗</a>`;
         });
         html += `</div>`;
 
