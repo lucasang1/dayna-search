@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dayna's search tool</title>
+    <style>
+        :root { --primary: #ff8fa3; --bg: #fff0f3; --text: #590d22; --warning: #ffb703; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 600px; }
+        h1 { margin-top: 0; color: var(--primary); font-size: 26px; text-align: center; letter-spacing: -0.5px; }
+        
+        /* MODE SWITCHER */
+        .mode-switch { display: flex; background: #eee; padding: 5px; border-radius: 12px; margin-bottom: 20px; }
+        .mode-btn { 
+            flex: 1; border: none; background: transparent; padding: 10px; border-radius: 8px; 
+            cursor: pointer; font-weight: 600; color: #666; transition: 0.2s;
+        }
+        .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        .date-badge { background: #fff0f3; border: 1px solid #ffccd5; padding: 8px 15px; border-radius: 8px; font-size: 13px; color: #d63384; text-align: center; margin-bottom: 25px; font-weight: 500;}
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        
+        button.search-btn { background-color: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button.search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        /* HEADERS */
+        .section-header { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 8px;}
+        .sub-text { font-size: 12px; color: #888; margin-bottom: 10px; font-weight: normal; }
+
+        /* BATCH BUTTONS (Google Search) */
+        .batch-btn { 
+            display: block; background: #fff; border: 2px solid var(--primary); color: var(--primary); 
+            padding: 12px; text-align: center; border-radius: 12px; text-decoration: none; margin-top: 10px; 
+            transition: 0.2s; font-weight: 600; 
+        }
+        .batch-btn:hover { background: var(--primary); color: white; }
+        
+        /* DIRECT BUTTONS (Internal Search) */
+        .direct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .direct-btn { 
+            background: #fff; border: 1px solid #ddd; color: #555; padding: 10px; 
+            text-align: center; border-radius: 8px; text-decoration: none; font-size: 13px; transition: 0.2s;
+        }
+        .direct-btn:hover { border-color: #666; color: #000; background: #f9f9f9; }
+
+        .manual-note { font-size: 12px; background: #fffbe6; padding: 8px; border-radius: 6px; margin-top: 5px; color: #856404; border: 1px solid #ffeeba;}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>dayna's search tool!</h1>
+    
+    <div class="mode-switch">
+        <button class="mode-btn active" onclick="setMode('weekly')">weekly</button>
+        <button class="mode-btn" onclick="setMode('monthly')">monthly</button>
+    </div>
+
+    <div class="date-badge" id="dateDisplay">calculating dates...</div>
+
+    <div class="input-group">
+        <input type="text" id="keyword" placeholder="e.g. onitsuka..." onkeydown="if(event.key==='Enter') runSearch()">
+        <button class="search-btn" onclick="runSearch()">Search</button>
+    </div>
+
+    <div id="resultsArea"></div>
+</div>
+
+<script>
+    // --- 1. THE QUARANTINE LIST (Problematic Sites) ---
+    const PROBLEM_SITES = [
+        { name: "Her World", url: "https://www.herworld.com/search?sort=latest&q=" },
+        { name: "Harpers Bazaar", url: "https://www.harpersbazaar.com.sg/search?sort=latest&q=" },
+        { name: "Icon Singapore", url: "https://www.iconsingapore.com/search?sort=latest&q=" },
+        { name: "NuYou", url: "https://www.nuyou.com.sg/search?sort=latest&q=" },
+        { name: "Lifestyle Asia", url: "https://www.lifestyleasia.com/sg/?category_name=&orderby=date&order=desc&s=" }
+    ];
+
+    // --- 2. THE TRUSTED LIST (Google Batch Sites) ---
+    const TRUSTED_SITES = [
+        "8days.sg", "8world.com", "readaplus.com", "asiaone.com", 
+        "augustman.com/sg", "avenueone.sg", "bagaholicboy.com", 
+        "beautyinsider.sg", "businessinsider.com", "channelnewsasia.com", 
+        "citynomads.com", "channelnewsasia.com/news/lifestyle", 
+        "cnaluxury.channelnewsasia.com", "curatedition.com", 
+        "danielfooddiary.com", "dailyvanity.sg", "thedcedit.com", 
+        "dfnionline.com", "elle.com.sg", "esquiresg.com", "expatliving.sg", 
+        "femalemag.com.sg", "girlstyle.com/sg", "grazia.sg", 
+        "homeanddecor.com.sg", 
+        "thehoneycombers.com/singapore", "insideretail.asia", 
+        "lofficielsingapore.com", "zaobao.com.sg", 
+        "lifestylecollective.org", "luxuo.com", 
+        "marketech-apac.com", "marketing-interactive.com", "mens-folio.com", 
+        "monocle.com", "musesingapore.com", "nylon.com.sg", 
+        "observatory.sg", "pinprestige.com/sg", "prestigeonline.com/sg", 
+        "robbreport.com.sg", "senatus.net", "sethlui.com", "sgmagazine.com", 
+        "shinmin.sg", "silverkris.com", "tatlerasia.com", "scmp.com", 
+        "superadrianme.com", "thebeaulife.co", "businesstimes.com.sg", 
+        "theedgesingapore.com", "tnp.sg", "thepeakmagazine.com.sg", 
+        "womensweekly.com.sg", "thesmartlocal.com", "straitstimes.com", 
+        "timeout.com/singapore", "todayonline.com/singapore", 
+        "mewatch.sg", "Vanillaluxury.sg", "vogue.sg", "vulcanpost.com", 
+        "weekender.com.sg", "sg.yahoo.com", "zula.sg"
+    ];
+
+    // --- STATE MANAGEMENT ---
+    let currentMode = 'weekly'; // 'weekly' or 'monthly'
+
+    // --- DATE LOGIC ---
+    function getDates() {
+        const today = new Date();
+        const fmt = d => d.toLocaleDateString('en-GB'); // DD/MM/YYYY
+        
+        if (currentMode === 'weekly') {
+            // Weekly: Last Tuesday to Last Monday
+            const dayOfWeek = today.getDay(); 
+            let daysToMon = dayOfWeek === 1 ? 0 : (dayOfWeek + 6) % 7; 
+            const endDate = new Date(today);
+            endDate.setDate(today.getDate() - daysToMon);
+            const startDate = new Date(endDate);
+            startDate.setDate(endDate.getDate() - 6);
+            return { 
+                label: `${fmt(startDate)} - ${fmt(endDate)}`,
+                tbs: 'qdr:w' // Standard "Past Week" filter
+            };
+        } else {
+            // Monthly: Previous full month (e.g., if Feb, choose Jan 1 - Jan 31)
+            // 1. Get first day of current month
+            const firstOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            // 2. Subtract 1 day to get Last Day of Previous Month
+            const endOfPrevMonth = new Date(firstOfThisMonth);
+            endOfPrevMonth.setDate(firstOfThisMonth.getDate() - 1);
+            // 3. Get First Day of Previous Month
+            const startOfPrevMonth = new Date(endOfPrevMonth.getFullYear(), endOfPrevMonth.getMonth(), 1);
+            
+            // Google Date Format needed for URL: MM/DD/YYYY
+            const gFmt = d => `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+            
+            return {
+                label: `${fmt(startOfPrevMonth)} - ${fmt(endOfPrevMonth)}`,
+                tbs: `cdr:1,cd_min:${gFmt(startOfPrevMonth)},cd_max:${gFmt(endOfPrevMonth)}` 
+            };
+        }
+    }
+
+    // --- UI FUNCTIONS ---
+    function setMode(mode) {
+        currentMode = mode;
+        // Update Buttons
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.mode-btn[onclick="setMode('${mode}')"]`).classList.add('active');
+        // Update Label
+        updateLabel();
+    }
+
+    function updateLabel() {
+        const info = getDates();
+        document.getElementById('dateDisplay').innerText = info.label;
+    }
+
+    // Initialize
+    updateLabel();
+
+    // --- MAIN SEARCH FUNCTION ---
+    function runSearch() {
+        const query = document.getElementById('keyword').value;
+        const resultsArea = document.getElementById('resultsArea');
+        if (!query) { alert("Enter a keyword first!"); return; }
+
+        const dateInfo = getDates(); // Get current filter logic
+
+        let html = ``;
+
+        // PART A: GOOGLE BATCHES
+        html += `<div class="section-header">✨ Batch Search</div>`;
+
+        const chunkSize = 15;
+        for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
+            const chunk = TRUSTED_SITES.slice(i, i + chunkSize);
+            const siteString = chunk.map(s => `site:${s}`).join(' OR ');
+            
+            // Logic: (site:A OR site:B) "query"
+            const fullQuery = `(${siteString}) "${query}"`;
+            const encodedQuery = encodeURIComponent(fullQuery);
+            
+            // Add the dynamic date parameter (tbs)
+            const searchUrl = `https://www.google.com/search?q=${encodedQuery}&tbs=${dateInfo.tbs}`; 
+            
+            html += `<a href="${searchUrl}" target="_blank" class="batch-btn">
+                Open Batch ${Math.floor(i/chunkSize) + 1}
+                <span style="font-size:12px; font-weight:normal; opacity:0.8; display:block;">
+                    (Sites ${i+1} - ${Math.min(i+chunkSize, TRUSTED_SITES.length)})
+                </span>
+            </a>`;
+        }
+
+        // PART B: DIRECT LINKS
+        html += `<div class="section-header" style="margin-top:40px;">⚠️ Problem Sites</div>`;
+        
+        if (currentMode === 'monthly') {
+             html += `<div class="manual-note">Note: These sites don't support strict "Previous Month" filters. Linking you to their latest results instead.</div>`;
+        } else {
+             html += `<div class="manual-note">These sites have bad dates on Google. We search their internal site directly instead.</div>`;
+        }
+        
+        html += `<div class="direct-grid" style="margin-top:10px;">`;
+        PROBLEM_SITES.forEach(site => {
+            const internalUrl = `${site.url}${encodeURIComponent(query)}`;
+            html += `<a href="${internalUrl}" target="_blank" class="direct-btn">Check ${site.name} ↗</a>`;
+        });
+        html += `</div>`;
+
+        resultsArea.innerHTML = html;
+    }
+</script>
+
+</body>
+</html>
