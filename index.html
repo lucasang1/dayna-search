@@ -13,7 +13,7 @@
         /* CONTROLS AREA */
         .controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
         .row { display: flex; gap: 10px; align-items: center; justify-content: center; }
-        .label-text { font-size: 14px; font-weight: 600; color: #888; min-width: 100px; text-align: right; }
+        .label-text { font-size: 14px; font-weight: 600; color: #888; min-width: 80px; text-align: right; }
 
         /* SWITCHER STYLES */
         .mode-switch { display: flex; background: #eee; padding: 4px; border-radius: 12px; flex: 1; }
@@ -23,11 +23,21 @@
         }
         .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
-        .date-badge { background: #fff; border: 1px solid #ffccd5; padding: 8px 15px; border-radius: 8px; font-size: 13px; color: #d63384; text-align: center; font-weight: 500; width: 100%; box-sizing: border-box;}
-        
+        /* DATE PICKER STYLES */
+        .date-row { display: flex; gap: 10px; flex: 1; align-items: center;}
+        input[type="date"] {
+            padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
+            font-family: inherit; color: #555; background: #fff; flex: 1;
+        }
+        .quick-btn {
+            background: #ffe0e6; border: none; color: #d63384; padding: 5px 10px; 
+            border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;
+        }
+        .quick-btn:hover { background: #ffccd5; }
+
         .input-group { display: flex; gap: 10px; margin-top: 10px; }
-        input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
+        input[type="text"] { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); }
         
         button.search-btn { background-color: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button.search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
@@ -59,21 +69,31 @@
     <h1>dayna's search tool!</h1>
     
     <div class="controls">
+        
         <div class="row">
-            <div class="mode-switch">
-                <button class="mode-btn active" id="btn-weekly" onclick="setMode('weekly')">weekly</button>
-                <button class="mode-btn" id="btn-monthly" onclick="setMode('monthly')">monthly</button>
+            <span class="label-text">Dates:</span>
+            <div class="date-row">
+                <input type="date" id="startDate">
+                <span style="font-size:12px; color:#888;">to</span>
+                <input type="date" id="endDate">
+            </div>
+        </div>
+        
+        <div class="row">
+            <span class="label-text"></span>
+            <div style="flex:1; display:flex; gap:5px;">
+                <button class="quick-btn" onclick="setQuickDate('weekly')">Last Week</button>
+                <button class="quick-btn" onclick="setQuickDate('monthly')">Last Month</button>
             </div>
         </div>
 
         <div class="row">
+            <span class="label-text">Style:</span>
             <div class="mode-switch">
                 <button class="mode-btn active" id="btn-batch" onclick="setStyle('batch')">Google Batches</button>
                 <button class="mode-btn" id="btn-individual" onclick="setStyle('individual')">Individual Sites</button>
             </div>
         </div>
-
-        <div class="date-badge" id="dateDisplay">calculating dates...</div>
 
         <div class="input-group">
             <input type="text" id="keyword" placeholder="e.g. onitsuka..." onkeydown="if(event.key==='Enter') runSearch()">
@@ -95,11 +115,7 @@
         { name: "Lifestyle Asia", url: "https://www.lifestyleasia.com/sg/?category_name=&orderby=date&order=desc&s=" }
     ];
 
-    /* TRUSTED SITES MAPPING 
-       type: 's' = /?s= (Standard WordPress/Blog)
-       type: 'q' = /search?q= (Standard News)
-       custom: Full URL string
-    */
+    /* TRUSTED SITES MAPPING */
     const TRUSTED_SITES = [
         { name: "8 Days", url: "8days.sg", type: 'q', full: "https://www.8days.sg/search?q=" },
         { name: "8 World", url: "8world.com", type: 'q', full: "https://www.8world.com/search?q=" },
@@ -130,8 +146,8 @@
         { name: "Zaobao", url: "zaobao.com.sg", type: 'custom', full: "https://www.zaobao.com.sg/sitesearch?r=" },
         { name: "Lifestyle Coll.", url: "lifestylecollective.org", type: 's' },
         { name: "Luxuo", url: "luxuo.com", type: 's' },
+        { name: "Marketech APAC", url: "marketech-apac.com", type: 's' }, 
         { name: "Marketing Int.", url: "marketing-interactive.com", type: 'custom', full: "https://www.marketing-interactive.com/contents?search_query=" },
-        { name: "Marketech APAC", url: "marketech-apac.com", type: 's' },
         { name: "Men's Folio", url: "mens-folio.com", type: 's' },
         { name: "Monocle", url: "monocle.com", type: 's'},
         { name: "Muse SG", url: "musesingapore.com", type: 'q' },
@@ -167,35 +183,51 @@
         { name: "Zula", url: "zula.sg", type: 's' }
     ];
 
-    let currentMode = 'weekly'; 
     let currentStyle = 'batch'; 
 
-    function getDates() {
+    // Initial load: set to last week
+    window.onload = function() {
+        setQuickDate('weekly');
+    };
+
+    function setQuickDate(type) {
         const today = new Date();
-        const fmt = d => d.toLocaleDateString('en-GB');
-        if (currentMode === 'weekly') {
+        let start = new Date();
+        let end = new Date();
+
+        if (type === 'weekly') {
             const dayOfWeek = today.getDay(); 
             let daysToMon = dayOfWeek === 1 ? 0 : (dayOfWeek + 6) % 7; 
-            const endDate = new Date(today);
-            endDate.setDate(today.getDate() - daysToMon);
-            const startDate = new Date(endDate);
-            startDate.setDate(endDate.getDate() - 6);
-            return { label: `${fmt(startDate)} - ${fmt(endDate)}`, tbs: 'qdr:w' };
-        } else {
+            end.setDate(today.getDate() - daysToMon);
+            start = new Date(end);
+            start.setDate(end.getDate() - 6);
+        } else if (type === 'monthly') {
             const firstOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            const endOfPrevMonth = new Date(firstOfThisMonth);
-            endOfPrevMonth.setDate(firstOfThisMonth.getDate() - 1);
-            const startOfPrevMonth = new Date(endOfPrevMonth.getFullYear(), endOfPrevMonth.getMonth(), 1);
-            const gFmt = d => `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
-            return { label: `${fmt(startOfPrevMonth)} - ${fmt(endOfPrevMonth)}`, tbs: `cdr:1,cd_min:${gFmt(startOfPrevMonth)},cd_max:${gFmt(endOfPrevMonth)}` };
+            end = new Date(firstOfThisMonth);
+            end.setDate(firstOfThisMonth.getDate() - 1); // Last day of prev month
+            start = new Date(end.getFullYear(), end.getMonth(), 1); // First day of prev month
         }
+
+        // Helper to format YYYY-MM-DD for input fields
+        const toInputStr = d => d.toISOString().split('T')[0];
+        document.getElementById('startDate').value = toInputStr(start);
+        document.getElementById('endDate').value = toInputStr(end);
     }
 
-    function setMode(mode) {
-        currentMode = mode;
-        document.getElementById('btn-weekly').classList.toggle('active', mode === 'weekly');
-        document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
-        updateLabel();
+    function getGoogleDateString() {
+        // Reads from inputs and converts to Google tbs format
+        const sVal = document.getElementById('startDate').value;
+        const eVal = document.getElementById('endDate').value;
+        
+        if(!sVal || !eVal) return 'qdr:w'; // Fallback to week if empty
+
+        // Convert YYYY-MM-DD to MM/DD/YYYY
+        const toG = dateStr => {
+            const [y, m, d] = dateStr.split('-');
+            return `${m}/${d}/${y}`;
+        };
+
+        return `cdr:1,cd_min:${toG(sVal)},cd_max:${toG(eVal)}`;
     }
 
     function setStyle(style) {
@@ -203,12 +235,6 @@
         document.getElementById('btn-batch').classList.toggle('active', style === 'batch');
         document.getElementById('btn-individual').classList.toggle('active', style === 'individual');
     }
-
-    function updateLabel() {
-        document.getElementById('dateDisplay').innerText = getDates().label;
-    }
-
-    updateLabel();
 
     function getDirectSearchUrl(site, query) {
         const encQuery = encodeURIComponent(query);
@@ -227,18 +253,19 @@
         const resultsArea = document.getElementById('resultsArea');
         if (!query) { alert("Enter a keyword first!"); return; }
 
-        const dateInfo = getDates();
         let html = ``;
 
         if (currentStyle === 'batch') {
             // BATCH LOGIC
-            html += `<div class="section-header">✨ Google Batches</div>`;
+            const tbs = getGoogleDateString();
+            html += `<div class="section-header">✨ Google Batches (Custom Dates)</div>`;
+            
             const chunkSize = 15;
             for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
                 const chunk = TRUSTED_SITES.slice(i, i + chunkSize);
                 // Extract URL from the object for the query string
                 const siteString = chunk.map(s => `site:${s.url}`).join(' OR ');
-                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`(${siteString}) "${query}"`)}&tbs=${dateInfo.tbs}`; 
+                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`(${siteString}) "${query}"`)}&tbs=${tbs}`; 
                 html += `<a href="${searchUrl}" target="_blank" class="batch-btn">Open Batch ${Math.floor(i/chunkSize) + 1} <span style="font-size:11px; font-weight:normal; display:block;">(Sites ${i+1}-${Math.min(i+chunkSize, TRUSTED_SITES.length)})</span></a>`;
             }
             html += `<div class="section-header" style="margin-top:30px;">⚠️ Internal Search (Problem Sites)</div>`;
@@ -250,7 +277,7 @@
         } else {
             // INDIVIDUAL (DIRECT) LOGIC
             html += `<div class="section-header">🔍 Direct Site Search (71 Sites)</div>`;
-            html += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The date range filter above will NOT apply</u> to these results.</div>`;
+            html += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The custom dates above will NOT apply</u> to these results.</div>`;
             html += `<div class="direct-grid">`;
             
             // 1. Trusted Sites (Now using Direct Internal Search)
