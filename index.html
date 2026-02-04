@@ -178,14 +178,14 @@
             endDate.setDate(today.getDate() - daysToMon);
             const startDate = new Date(endDate);
             startDate.setDate(endDate.getDate() - 6);
-            return { label: `Weekly: ${fmt(startDate)} - ${fmt(endDate)}`, tbs: 'qdr:w' };
+            return { label: `${fmt(startDate)} - ${fmt(endDate)}`, tbs: 'qdr:w' };
         } else {
             const firstOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             const endOfPrevMonth = new Date(firstOfThisMonth);
             endOfPrevMonth.setDate(firstOfThisMonth.getDate() - 1);
             const startOfPrevMonth = new Date(endOfPrevMonth.getFullYear(), endOfPrevMonth.getMonth(), 1);
             const gFmt = d => `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
-            return { label: `Monthly: ${fmt(startOfPrevMonth)} - ${fmt(endOfPrevMonth)}`, tbs: `cdr:1,cd_min:${gFmt(startOfPrevMonth)},cd_max:${gFmt(endOfPrevMonth)}` };
+            return { label: `${fmt(startOfPrevMonth)} - ${fmt(endOfPrevMonth)}`, tbs: `cdr:1,cd_min:${gFmt(startOfPrevMonth)},cd_max:${gFmt(endOfPrevMonth)}` };
         }
     }
 
