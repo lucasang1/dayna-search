@@ -60,7 +60,6 @@
     
     <div class="controls">
         <div class="row">
-            <span class="label-text">Range:</span>
             <div class="mode-switch">
                 <button class="mode-btn active" id="btn-weekly" onclick="setMode('weekly')">weekly</button>
                 <button class="mode-btn" id="btn-monthly" onclick="setMode('monthly')">monthly</button>
@@ -68,7 +67,6 @@
         </div>
 
         <div class="row">
-            <span class="label-text">Style:</span>
             <div class="mode-switch">
                 <button class="mode-btn active" id="btn-batch" onclick="setStyle('batch')">Google Batches</button>
                 <button class="mode-btn" id="btn-individual" onclick="setStyle('individual')">Individual Sites</button>
@@ -216,7 +214,7 @@
             return `${site.full}${encQuery}`;
         }
         if (site.type === 'q') {
-            return `https://www.${site.url}/search?q=${encQuery}`;
+            return `https://www.${site.url}/search?sort=latest&q=${encQuery}`;
         }
         // Default to 's' (WordPress style)
         return `https://${site.url}/?s=${encQuery}`;
