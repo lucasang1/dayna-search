@@ -217,7 +217,7 @@
             return `https://www.${site.url}/search?sort=latest&q=${encQuery}`;
         }
         // Default to 's' (WordPress style)
-        return `https://${site.url}/?s=${encQuery}`;
+        return `https://${site.url}/?sort=latest&s=${encQuery}`;
     }
 
     function runSearch() {
