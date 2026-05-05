@@ -226,7 +226,8 @@
             return `${m}/${d}/${y}`;
         };
 
-        return `cdr:1,cd_min:${toG(sVal)},cd_max:${toG(eVal)}`;
+        // ADDED: ,sbd:1 forces strict chronological sorting, bypassing relevance filters
+        return `cdr:1,cd_min:${toG(sVal)},cd_max:${toG(eVal)},sbd:1`;
     }
 
     function setStyle(style) {
@@ -262,8 +263,10 @@
             const chunkSize = 15;
             for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
                 const chunk = TRUSTED_SITES.slice(i, i + chunkSize);
-                // Extract URL from the object for the query string
-                const siteString = chunk.map(s => `site:${s.url}`).join(' OR ');
+                
+                // ADDED: .split('/')[0] removes subdirectories like /sg, which breaks Google's OR logic
+                const siteString = chunk.map(s => `site:${s.url.split('/')[0]}`).join(' OR ');
+                
                 const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`(${siteString}) "${query}"`)}&tbs=${tbs}`; 
                 html += `<a href="${searchUrl}" target="_blank" class="batch-btn">Open Batch ${Math.floor(i/chunkSize) + 1} <span style="font-size:11px; font-weight:normal; display:block;">(Sites ${i+1}-${Math.min(i+chunkSize, TRUSTED_SITES.length)})</span></a>`;
             }
@@ -279,13 +282,13 @@
             html += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The custom dates above will NOT apply</u> to these results.</div>`;
             html += `<div class="direct-grid">`;
             
-            // 1. Trusted Sites (Now using Direct Internal Search)
+            // 1. Trusted Sites
             TRUSTED_SITES.forEach(site => {
                 const searchUrl = getDirectSearchUrl(site, query);
                 html += `<a href="${searchUrl}" target="_blank" class="direct-btn">${site.name}</a>`;
             });
             
-            // 2. Problematic Sites via Internal
+            // 2. Problematic Sites
             PROBLEM_SITES.forEach(site => {
                 html += `<a href="${site.url}${encodeURIComponent(query)}" target="_blank" class="direct-btn";">${site.name}</a>`;
             });
