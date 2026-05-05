@@ -288,7 +288,6 @@
 
             // APPEND PROBLEM SITES IN BATCH MODE
             htmlContent += `<div class="section-header" style="margin-top:30px;">⚠️ Internal Search (Problem Sites)</div>`;
-            htmlContent += `<div class="manual-note"><b>Note:</b> These sites block Google's batch indexing. These buttons search the sites directly.</div>`;
             htmlContent += `<div class="direct-grid">`;
             PROBLEM_SITES.forEach(site => {
                 htmlContent += `<a href="${site.url}${encodeURIComponent(query)}" target="_blank" class="direct-btn">${site.name} ↗</a>`;
