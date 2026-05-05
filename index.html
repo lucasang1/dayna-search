@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dayna's search tool</title>
+    <!-- Favicon (Pink Cherry Blossom to match the theme) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
     <style>
         :root { --primary: #ff8fa3; --bg: #fff0f3; --text: #590d22; --warning: #ffb703; --secondary: #ffccd5; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); padding: 40px; display: flex; flex-direction: column; align-items: center; zoom: 0.9;}
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 700px; box-sizing: border-box; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 700px; box-sizing: border-box; transition: all 0.3s ease;}
         h1 { margin-top: 0; color: var(--primary); font-size: 26px; text-align: center; letter-spacing: -0.5px; }
         
         /* CONTROLS AREA */
@@ -75,6 +77,23 @@
         .direct-btn:hover { border-color: var(--primary); color: var(--primary); background: #fff0f3; }
 
         .manual-note { font-size: 12px; background: #fffbe6; padding: 8px; border-radius: 6px; margin-bottom: 15px; color: #856404; border: 1px solid #ffeeba;}
+
+        /* DISCLAIMER BOX STYLES */
+        .disclaimer-box {
+            background: #fffbfa; border: 1px solid #ffeeba; border-radius: 12px;
+            padding: 15px 20px; margin-top: 40px; font-size: 11px; color: #777; line-height: 1.5;
+        }
+        .disclaimer-box h3 { color: #d63384; font-size: 12px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .disclaimer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+        .cluster { background: white; padding: 8px; border-radius: 6px; border: 1px solid #eee; }
+        .cluster strong { display: block; color: #555; margin-bottom: 3px; font-size: 11px; }
+
+        /* DROP-DOWN ANIMATION */
+        @keyframes slideDownFade {
+            0% { opacity: 0; transform: translateY(-15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animated-results { animation: slideDownFade 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
     </style>
 </head>
 <body>
@@ -110,6 +129,30 @@
     </div>
 
     <div id="resultsArea"></div>
+
+    <div class="disclaimer-box">
+        <h3>💡 Quick PR Tip: The "Ghosting" Effect</h3>
+        <p style="margin:0;">Publishers often copy-paste the exact same article across their sister magazines. When this happens, Google hides the duplicates. If you spot a hit on one of these sites, use the <b>Individual Sites</b> tab to manually check its sister publications!</p>
+        
+        <div class="disclaimer-grid">
+            <div class="cluster">
+                <strong>👑 BurdaLuxury</strong>
+                Lifestyle Asia <i>(usually 1st)</i>, Augustman, Prestige, PIN Prestige
+            </div>
+            <div class="cluster">
+                <strong>📰 SPH Media</strong>
+                Her World, Harper's Bazaar, F ZINE, NuYou, Icon, The Peak, Home & Decor
+            </div>
+            <div class="cluster">
+                <strong>💎 Heart Media</strong>
+                Luxuo, Men's Folio, L'Officiel, Grazia, Esquire, ELLE
+            </div>
+            <div class="cluster">
+                <strong>📺 Mediacorp</strong>
+                CNA / CNA Luxury, 8 Days, Today Online
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -249,11 +292,11 @@
         const resultsArea = document.getElementById('resultsArea');
         if (!query) { alert("Enter a keyword first!"); return; }
 
-        let html = ``;
+        let htmlContent = ``;
 
         if (currentStyle === 'batch') {
             const tbs = getGoogleDateString();
-            html += `<div class="section-header">✨ Google Batches (Custom Dates)</div>`;
+            htmlContent += `<div class="section-header">✨ Google Batches (Custom Dates)</div>`;
             
             const chunkSize = 15;
             for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
@@ -266,7 +309,7 @@
                 const siteNames = chunk.map(s => s.name).join(', ');
                 
                 const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`(${siteString}) "${query}"`)}&tbs=${tbs}&filter=0`; 
-                html += `
+                htmlContent += `
                 <a href="${searchUrl}" target="_blank" class="batch-btn">
                     Batch ${Math.floor(i/chunkSize) + 1}
                     <span class="batch-subtitle">
@@ -275,18 +318,19 @@
                 </a>`;
             }
         } else {
-            html += `<div class="section-header">🔍 Direct Site Search (${TRUSTED_SITES.length} Sites)</div>`;
-            html += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The custom dates above will NOT apply</u> to these results.</div>`;
-            html += `<div class="direct-grid">`;
+            htmlContent += `<div class="section-header">🔍 Direct Site Search (${TRUSTED_SITES.length} Sites)</div>`;
+            htmlContent += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The custom dates above will NOT apply</u> to these results.</div>`;
+            htmlContent += `<div class="direct-grid">`;
             
             TRUSTED_SITES.forEach(site => {
                 const searchUrl = getDirectSearchUrl(site, query);
-                html += `<a href="${searchUrl}" target="_blank" class="direct-btn" title="${site.name}">${site.name}</a>`;
+                htmlContent += `<a href="${searchUrl}" target="_blank" class="direct-btn" title="${site.name}">${site.name}</a>`;
             });
-            html += `</div>`;
+            htmlContent += `</div>`;
         }
 
-        resultsArea.innerHTML = html;
+        // Apply the animation wrapper
+        resultsArea.innerHTML = `<div class="animated-results">${htmlContent}</div>`;
     }
 </script>
 
