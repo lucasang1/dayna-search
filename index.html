@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dayna's search tool!</title>
+    <title>dayna's search tool</title>
     <!-- Favicon (Pink Cherry Blossom to match the theme) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
     <style>
@@ -104,7 +104,7 @@
     <div class="controls">
         
         <div class="row">
-            <span class="label-text">Date:</span>
+            <span class="label-text">Dates:</span>
             <div class="date-row">
                 <input type="date" id="startDate">
                 <span style="font-size:12px; color:#888;">to</span>
@@ -129,10 +129,48 @@
     </div>
 
     <div id="resultsArea"></div>
+
+    <div class="disclaimer-box">
+        <h3>💡 Quick PR Tip: The "Ghosting" Effect</h3>
+        <p style="margin:0;">Publishers often copy-paste the exact same article across their sister magazines. When this happens, Google hides the duplicates. If you spot a hit on one of these sites, use the <b>Individual Sites</b> tab to manually check its sister publications.</p>
+        
+        <div class="disclaimer-grid">
+            <div class="cluster">
+                <strong>👑 BurdaLuxury</strong>
+                Lifestyle Asia <i>(usually 1st)</i>, August Man, Prestige, Pin Prestige
+            </div>
+            <div class="cluster">
+                <strong>📰 SPH Media</strong>
+                Her World, Harper's Bazaar, Female, NuYou, Icon, The Peak, Women's Weekly, Straits Times, Business Times, Zaobao, Shin Min, TNP
+            </div>
+            <div class="cluster">
+                <strong>💎 Heart Media</strong>
+                Luxuo, Men's Folio, L'Officiel, Grazia, Esquire, ELLE
+            </div>
+            <div class="cluster">
+                <strong>📺 Mediacorp</strong>
+                CNA / CNA Luxury, 8 Days, 8 World, Today Online, MeWatch
+            </div>
+            <div class="cluster">
+                <strong>🌟 Independents</strong>
+                Tatler, Vogue, AsiaOne, Smart Local, Zula, Time Out, Yahoo, Honeycombers, Business Insider, Bagaholicboy, & 20+ others
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    /* TRUSTED SITES MAPPING (Merged) */
+    // PROBLEM SITES (Pulled out of batches because their Google indexing is heavily blocked/broken)
+    const PROBLEM_SITES = [
+        { name: "Esquire SG", url: "https://esquiresg.com/?s=" },
+        { name: "Her World", url: "https://www.herworld.com/search?sort=latest&q=" },
+        { name: "Harpers Bazaar", url: "https://www.harpersbazaar.com.sg/search?sort=latest&q=" },
+        { name: "Icon Singapore", url: "https://www.iconsingapore.com/search?sort=latest&q=" },
+        { name: "NuYou", url: "https://www.nuyou.com.sg/search?sort=latest&q=" },
+        { name: "Lifestyle Asia", url: "https://www.lifestyleasia.com/sg/?category_name=&orderby=date&order=desc&s=" }
+    ];
+
+    /* TRUSTED SITES MAPPING (Batch-Friendly) */
     const TRUSTED_SITES = [
         { name: "8 Days", url: "8days.sg", type: 'q', full: "https://www.8days.sg/search?q=" },
         { name: "8 World", url: "8world.com", type: 'q', full: "https://www.8world.com/search?q=" },
@@ -147,23 +185,17 @@
         { name: "Curatedition", url: "curatedition.com", type: 's' },
         { name: "Daily Vanity", url: "dailyvanity.sg", type: 's' },
         { name: "Elle SG", url: "elle.com.sg", type: 's' },
-        { name: "Esquire SG", url: "esquiresg.com", type: 's' },
         { name: "Female Mag", url: "fzine.com", type: 'q' },
         { name: "GirlStyle", url: "girlstyle.com/sg", type: 'custom', full: "https://girlstyle.com/sg/search?q=" },
         { name: "Grazia", url: "grazia.sg", type: 's' },
-        { name: "Harpers Bazaar", url: "harpersbazaar.com.sg", type: 'q' },
-        { name: "Her World", url: "herworld.com", type: 'q', full: "https://www.herworld.com/search?sort=latest&q=" },
         { name: "Honeycombers", url: "thehoneycombers.com/singapore", type: 's' },
-        { name: "Icon Singapore", url: "iconsingapore.com", type: 'q' },
         { name: "Inside Retail", url: "insideretail.asia", type: 's' },
         { name: "L'Officiel", url: "lofficielsingapore.com", type: 'q' },
-        { name: "Lifestyle Asia", url: "lifestyleasia.com/sg", type: 's' },
         { name: "Lifestyle Coll.", url: "lifestylecollective.org", type: 's' },
         { name: "Luxuo", url: "luxuo.com", type: 's' },
         { name: "MeWatch", url: "mewatch.sg", type: 'custom', full: "https://www.mewatch.sg/search?q=" },
         { name: "Men's Folio", url: "mens-folio.com", type: 's' },
         { name: "Muse SG", url: "musesingapore.com", type: 'q' },
-        { name: "NuYou", url: "nuyou.com.sg", type: 'q' },
         { name: "Nylon SG", url: "nylon.com.sg", type: 's' },
         { name: "Observatory", url: "observatory.sg", type: 's' },
         { name: "Pin Prestige", url: "pinprestige.com/sg", type: 's' },
@@ -182,6 +214,7 @@
         { name: "The Smart Local", url: "thesmartlocal.com", type: 's' },
         { name: "Straits Times", url: "straitstimes.com", type: 'custom', full: "https://www.straitstimes.com/search?sort=date&searchkey=" },
         { name: "Time Out", url: "timeout.com/singapore", type: 'custom', full: "https://www.timeout.com/singapore/search?q=" },
+        { name: "TNP (Stomp)", url: "tnp.sg", type: 'custom', full: "https://www.stomp.sg/sitesearch/?sort=latest&key=" },
         { name: "Today Online", url: "todayonline.com/singapore", type: 'custom', full: "https://www.todayonline.com/search?q=" },
         { name: "Vanilla Luxury", url: "Vanillaluxury.sg", type: 'custom', full: "https://www.vanillaluxury.sg/search/node?keys=" },
         { name: "Vogue SG", url: "vogue.sg", type: 's' },
@@ -258,7 +291,9 @@
         let htmlContent = ``;
 
         if (currentStyle === 'batch') {
-            const tbs = getGoogleDateString();            
+            const tbs = getGoogleDateString();
+            htmlContent += `<div class="section-header">✨ Google Batches (Custom Dates)</div>`;
+            
             const chunkSize = 15;
             for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
                 const chunk = TRUSTED_SITES.slice(i, i + chunkSize);
@@ -278,8 +313,18 @@
                     </span>
                 </a>`;
             }
+
+            // APPEND PROBLEM SITES IN BATCH MODE
+            htmlContent += `<div class="section-header" style="margin-top:30px;">⚠️ Internal Search (Problem Sites)</div>`;
+            htmlContent += `<div class="manual-note"><b>Note:</b> These sites block Google's batch indexing. These buttons search the sites directly.</div>`;
+            htmlContent += `<div class="direct-grid">`;
+            PROBLEM_SITES.forEach(site => {
+                htmlContent += `<a href="${site.url}${encodeURIComponent(query)}" target="_blank" class="direct-btn">${site.name} ↗</a>`;
+            });
+            htmlContent += `</div>`;
+
         } else {
-            htmlContent += `<div class="section-header">🔍 Direct Site Search (${TRUSTED_SITES.length} Sites)</div>`;
+            htmlContent += `<div class="section-header">🔍 Direct Site Search</div>`;
             htmlContent += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The custom dates above will NOT apply</u> to these results.</div>`;
             htmlContent += `<div class="direct-grid">`;
             
@@ -287,6 +332,12 @@
                 const searchUrl = getDirectSearchUrl(site, query);
                 htmlContent += `<a href="${searchUrl}" target="_blank" class="direct-btn" title="${site.name}">${site.name}</a>`;
             });
+
+            // APPEND PROBLEM SITES IN INDIVIDUAL MODE TOO
+            PROBLEM_SITES.forEach(site => {
+                htmlContent += `<a href="${site.url}${encodeURIComponent(query)}" target="_blank" class="direct-btn" style="border-color: #ffccd5;">${site.name}</a>`;
+            });
+
             htmlContent += `</div>`;
         }
 
