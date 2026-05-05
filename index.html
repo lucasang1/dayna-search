@@ -105,21 +105,10 @@
 </div>
 
 <script>
-    // Problem Sites (Pre-mapped)
-    const PROBLEM_SITES = [
-        { name: "Esquire SG", url: "https://esquiresg.com/?s=" },
-        { name: "Her World", url: "https://www.herworld.com/search?sort=latest&q=" },
-        { name: "Harpers Bazaar", url: "https://www.harpersbazaar.com.sg/search?sort=latest&q=" },
-        { name: "Icon Singapore", url: "https://www.iconsingapore.com/search?sort=latest&q=" },
-        { name: "NuYou", url: "https://www.nuyou.com.sg/search?sort=latest&q=" },
-        { name: "Lifestyle Asia", url: "https://www.lifestyleasia.com/sg/?category_name=&orderby=date&order=desc&s=" }
-    ];
-
-    /* TRUSTED SITES MAPPING */
+    /* TRUSTED SITES MAPPING (Merged) */
     const TRUSTED_SITES = [
         { name: "8 Days", url: "8days.sg", type: 'q', full: "https://www.8days.sg/search?q=" },
         { name: "8 World", url: "8world.com", type: 'q', full: "https://www.8world.com/search?q=" },
-        { name: "Read A Plus", url: "readaplus.com", type: 's' }, 
         { name: "AsiaOne", url: "asiaone.com", type: 'custom', full: "https://www.asiaone.com/search?q=" },
         { name: "August Man", url: "augustman.com/sg", type: 's' },
         { name: "Avenue One", url: "avenueone.sg", type: 's' },
@@ -127,64 +116,70 @@
         { name: "Beauty Insider", url: "beautyinsider.sg", type: 's' },
         { name: "Business Insider", url: "businessinsider.com", type: 'q', full: "https://www.businessinsider.com/answers#" },
         { name: "CNA", url: "channelnewsasia.com", type: 'custom', full: "https://www.channelnewsasia.com/search?q=" },
-        { name: "City Nomads", url: "citynomads.com", type: 's' },
         { name: "CNA Luxury", url: "cnaluxury.channelnewsasia.com", type: 'custom', full: "https://cnaluxury.channelnewsasia.com/search?q=" },
+        { name: "City Nomads", url: "citynomads.com", type: 's' },
         { name: "Curatedition", url: "curatedition.com", type: 's' },
-        { name: "Daniel Food Diary", url: "danielfooddiary.com", type: 's' },
         { name: "Daily Vanity", url: "dailyvanity.sg", type: 's' },
-        { name: "The DC Edit", url: "thedcedit.com", type: 's' },
+        { name: "Daniel Food Diary", url: "danielfooddiary.com", type: 's' },
         { name: "DFNI Online", url: "dfnionline.com", type: 's' },
         { name: "Elle SG", url: "elle.com.sg", type: 's' },
+        { name: "Esquire SG", url: "esquiresg.com", type: 's' },
         { name: "Expat Living", url: "expatliving.sg", type: 's' },
-        { name: "Female Mag (Fzine)", url: "fzine.com", type: 'q' },
+        { name: "Female Mag", url: "fzine.com", type: 'q' },
         { name: "GirlStyle", url: "girlstyle.com/sg", type: 'custom', full: "https://girlstyle.com/sg/search?q=" },
         { name: "Grazia", url: "grazia.sg", type: 's' },
+        { name: "Harpers Bazaar", url: "harpersbazaar.com.sg", type: 'q' },
+        { name: "Her World", url: "herworld.com", type: 'q', full: "https://www.herworld.com/search?sort=latest&q=" },
         { name: "Home & Decor", url: "homeanddecor.com.sg", type: 'q' },
         { name: "Honeycombers", url: "thehoneycombers.com/singapore", type: 's' },
+        { name: "Icon Singapore", url: "iconsingapore.com", type: 'q' },
         { name: "Inside Retail", url: "insideretail.asia", type: 's' },
         { name: "L'Officiel", url: "lofficielsingapore.com", type: 'q' },
-        { name: "Zaobao", url: "zaobao.com.sg", type: 'custom', full: "https://www.zaobao.com.sg/sitesearch?r=" },
+        { name: "Lifestyle Asia", url: "lifestyleasia.com/sg", type: 's' },
         { name: "Lifestyle Coll.", url: "lifestylecollective.org", type: 's' },
         { name: "Luxuo", url: "luxuo.com", type: 's' },
         { name: "Marketech APAC", url: "marketech-apac.com", type: 's' }, 
         { name: "Marketing Int.", url: "marketing-interactive.com", type: 'custom', full: "https://www.marketing-interactive.com/contents?search_query=" },
+        { name: "MeWatch", url: "mewatch.sg", type: 'custom', full: "https://www.mewatch.sg/search?q=" },
         { name: "Men's Folio", url: "mens-folio.com", type: 's' },
         { name: "Monocle", url: "monocle.com", type: 's'},
         { name: "Muse SG", url: "musesingapore.com", type: 'q' },
+        { name: "NuYou", url: "nuyou.com.sg", type: 'q' },
         { name: "Nylon SG", url: "nylon.com.sg", type: 's' },
         { name: "Observatory", url: "observatory.sg", type: 's' },
         { name: "Pin Prestige", url: "pinprestige.com/sg", type: 's' },
         { name: "Prestige Online", url: "prestigeonline.com/sg", type: 's' },
+        { name: "Read A Plus", url: "readaplus.com", type: 's' }, 
         { name: "Robb Report", url: "robbreport.com.sg", type: 's' },
         { name: "Senatus", url: "senatus.net", type: 'custom', full: "https://senatus.net/search/?query=" },
         { name: "Seth Lui", url: "sethlui.com", type: 's' },
         { name: "SG Magazine", url: "sgmagazine.com", type: 's' },
         { name: "Shin Min", url: "shinmin.sg", type: 'custom', full: "https://www.shinmin.sg/sitesearch?key=" },
         { name: "SilverKris", url: "silverkris.com", type: 's' },
-        { name: "Tatler Asia", url: "tatlerasia.com", type: 'custom', full: "https://www.tatlerasia.com/search?q=" },
         { name: "SuperAdrianMe", url: "superadrianme.com", type: 's' },
+        { name: "Tatler Asia", url: "tatlerasia.com", type: 'custom', full: "https://www.tatlerasia.com/search?q=" },
         { name: "The Beau Life", url: "thebeaulife.co", type: 's' },
-        { name: "Business Times", url: "businesstimes.com.sg", type: 'custom', full: "https://www.businesstimes.com.sg/search?query=" },
+        { name: "The Business Times", url: "businesstimes.com.sg", type: 'custom', full: "https://www.businesstimes.com.sg/search?query=" },
+        { name: "The DC Edit", url: "thedcedit.com", type: 's' },
         { name: "The Edge", url: "theedgesingapore.com", type: 'custom', full: "https://www.theedgesingapore.com/search/content/" },
-        { name: "TNP (Stomp)", url: "tnp.sg", type: 'custom', full: "https://www.stomp.sg/sitesearch/?sort=latest&key=" },
         { name: "The Peak", url: "thepeakmagazine.com.sg", type: 'q' },
-        { name: "Women's Weekly", url: "womensweekly.com.sg", type: 'q' },
         { name: "The Smart Local", url: "thesmartlocal.com", type: 's' },
         { name: "Straits Times", url: "straitstimes.com", type: 'custom', full: "https://www.straitstimes.com/search?sort=date&searchkey=" },
         { name: "Time Out", url: "timeout.com/singapore", type: 'custom', full: "https://www.timeout.com/singapore/search?q=" },
+        { name: "TNP (Stomp)", url: "tnp.sg", type: 'custom', full: "https://www.stomp.sg/sitesearch/?sort=latest&key=" },
         { name: "Today Online", url: "todayonline.com/singapore", type: 'custom', full: "https://www.todayonline.com/search?q=" },
-        { name: "MeWatch", url: "mewatch.sg", type: 'custom', full: "https://www.mewatch.sg/search?q=" },
         { name: "Vanilla Luxury", url: "Vanillaluxury.sg", type: 'custom', full: "https://www.vanillaluxury.sg/search/node?keys=" },
         { name: "Vogue SG", url: "vogue.sg", type: 's' },
         { name: "Vulcan Post", url: "vulcanpost.com", type: 's' },
         { name: "Weekender", url: "weekender.com.sg", type: 's' },
+        { name: "Women's Weekly", url: "womensweekly.com.sg", type: 'q' },
         { name: "Yahoo SG", url: "sg.yahoo.com", type: 'custom', full: "https://sg.search.yahoo.com/search?p=" },
+        { name: "Zaobao", url: "zaobao.com.sg", type: 'custom', full: "https://www.zaobao.com.sg/sitesearch?r=" },
         { name: "Zula", url: "zula.sg", type: 's' }
     ];
 
     let currentStyle = 'batch'; 
 
-    // Initial load: set to last week
     window.onload = function() {
         setQuickDate('weekly');
     };
@@ -203,30 +198,24 @@
         } else if (type === 'monthly') {
             const firstOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             end = new Date(firstOfThisMonth);
-            end.setDate(firstOfThisMonth.getDate() - 1); // Last day of prev month
-            start = new Date(end.getFullYear(), end.getMonth(), 1); // First day of prev month
+            end.setDate(firstOfThisMonth.getDate() - 1); 
+            start = new Date(end.getFullYear(), end.getMonth(), 1); 
         }
 
-        // Helper to format YYYY-MM-DD for input fields
         const toInputStr = d => d.toISOString().split('T')[0];
         document.getElementById('startDate').value = toInputStr(start);
         document.getElementById('endDate').value = toInputStr(end);
     }
 
     function getGoogleDateString() {
-        // Reads from inputs and converts to Google tbs format
         const sVal = document.getElementById('startDate').value;
         const eVal = document.getElementById('endDate').value;
-        
-        if(!sVal || !eVal) return 'qdr:w'; // Fallback to week if empty
+        if(!sVal || !eVal) return 'qdr:w'; 
 
-        // Convert YYYY-MM-DD to MM/DD/YYYY
         const toG = dateStr => {
             const [y, m, d] = dateStr.split('-');
             return `${m}/${d}/${y}`;
         };
-
-        // ADDED: ,sbd:1 forces strict chronological sorting, bypassing relevance filters
         return `cdr:1,cd_min:${toG(sVal)},cd_max:${toG(eVal)},sbd:1`;
     }
 
@@ -244,7 +233,6 @@
         if (site.type === 'q') {
             return `https://www.${site.url}/search?sort=latest&q=${encQuery}`;
         }
-        // Default to 's' (WordPress style)
         return `https://${site.url}/?sort=latest&s=${encQuery}`;
     }
 
@@ -256,7 +244,6 @@
         let html = ``;
 
         if (currentStyle === 'batch') {
-            // BATCH LOGIC
             const tbs = getGoogleDateString();
             html += `<div class="section-header">✨ Google Batches (Custom Dates)</div>`;
             
@@ -264,33 +251,29 @@
             for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
                 const chunk = TRUSTED_SITES.slice(i, i + chunkSize);
                 
-                // ADDED: .split('/')[0] removes subdirectories like /sg, which breaks Google's OR logic
+                // Keep the split trick, it is strictly required for Google's OR logic
                 const siteString = chunk.map(s => `site:${s.url.split('/')[0]}`).join(' OR ');
                 
+                // Get the readable names to display on the button
+                const siteNames = chunk.map(s => s.name).join(', ');
+                
                 const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(`(${siteString}) "${query}"`)}&tbs=${tbs}&filter=0`; 
-                html += `<a href="${searchUrl}" target="_blank" class="batch-btn">Open Batch ${Math.floor(i/chunkSize) + 1} <span style="font-size:11px; font-weight:normal; display:block;">(Sites ${i+1}-${Math.min(i+chunkSize, TRUSTED_SITES.length)})</span></a>`;
+                html += `
+                <a href="${searchUrl}" target="_blank" class="batch-btn">
+                    Open Batch ${Math.floor(i/chunkSize) + 1}
+                    <span style="font-size:11px; font-weight:normal; display:block; margin-top:6px; color:#d63384; line-height:1.4;">
+                        ${siteNames}
+                    </span>
+                </a>`;
             }
-            html += `<div class="section-header" style="margin-top:30px;">⚠️ Internal Search (Problem Sites)</div>`;
-            html += `<div class="direct-grid">`;
-            PROBLEM_SITES.forEach(site => {
-                html += `<a href="${site.url}${encodeURIComponent(query)}" target="_blank" class="direct-btn">${site.name} ↗</a>`;
-            });
-            html += `</div>`;
         } else {
-            // INDIVIDUAL (DIRECT) LOGIC
-            html += `<div class="section-header">🔍 Direct Site Search (71 Sites)</div>`;
+            html += `<div class="section-header">🔍 Direct Site Search (${TRUSTED_SITES.length} Sites)</div>`;
             html += `<div class="manual-note"><b>Note:</b> These buttons search the website directly. <u>The custom dates above will NOT apply</u> to these results.</div>`;
             html += `<div class="direct-grid">`;
             
-            // 1. Trusted Sites
             TRUSTED_SITES.forEach(site => {
                 const searchUrl = getDirectSearchUrl(site, query);
-                html += `<a href="${searchUrl}" target="_blank" class="direct-btn">${site.name}</a>`;
-            });
-            
-            // 2. Problematic Sites
-            PROBLEM_SITES.forEach(site => {
-                html += `<a href="${site.url}${encodeURIComponent(query)}" target="_blank" class="direct-btn";">${site.name}</a>`;
+                html += `<a href="${searchUrl}" target="_blank" class="direct-btn" title="${site.name}">${site.name}</a>`;
             });
             html += `</div>`;
         }
