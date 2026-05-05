@@ -258,9 +258,7 @@
         let htmlContent = ``;
 
         if (currentStyle === 'batch') {
-            const tbs = getGoogleDateString();
-            htmlContent += `<div class="section-header">✨ Google Batches (Custom Dates)</div>`;
-            
+            const tbs = getGoogleDateString();            
             const chunkSize = 15;
             for (let i = 0; i < TRUSTED_SITES.length; i += chunkSize) {
                 const chunk = TRUSTED_SITES.slice(i, i + chunkSize);
